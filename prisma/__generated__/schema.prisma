@@ -1,0 +1,182 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./__generated__"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URI")
+}
+
+model User {
+  id String @id @default(uuid())
+
+  email       String  @unique
+  password    String
+  displayName String
+  picture     String?
+
+  role UserRoleEnum @default(STUDENT)
+
+  Subject Subject[]
+
+  Group Group[]
+
+  isVerified         Boolean @default(false) @map("is_verified")
+  isTwoFactorEnabled Boolean @default(false) @map("is_two_factor_enabled")
+
+  method AuthMethodEnum
+
+  accounts Account[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Account {
+  id String @id @default(uuid())
+
+  type     String
+  provider String
+
+  refreshToken String? @map("refresh_token")
+  accessToken  String? @map("access_token")
+  expiresAt    Int     @map("expires_at")
+
+  user   User?   @relation(fields: [userId], references: [id])
+  userId String? @map("user_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("account")
+}
+
+model Token {
+  id String @id @default(uuid())
+
+  email     String
+  token     String        @unique
+  type      TokenTypeEnum
+  expiresIn DateTime      @map("expires_in")
+
+  @@map("tokens")
+}
+
+model Group {
+  id       String    @id @default(uuid())
+  name     String    @unique
+  students User[]
+  schedule Schedule?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("grops")
+}
+
+model Schedule {
+  id      String @id @default(uuid())
+  group   Group  @relation(fields: [groupId], references: [id])
+  groupId String @unique
+
+  days DayOfWeek[]
+
+  // Незабыть реализацию четных и не недель
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("schedules")
+}
+
+model DayOfWeek {
+  id         String        @id @default(uuid())
+  dayOfWeek  DayOfWeekEnum
+  lessons    Lesson[]
+  schedule   Schedule      @relation(fields: [scheduleId], references: [id])
+  scheduleId String
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("time_table_entries")
+}
+
+model Lesson {
+  id       String            @id @default(uuid())
+  evenWeek SubjectInstance[] @relation("EvenWeekInstances")
+  oddWeek  SubjectInstance[] @relation("OddWeekInstances")
+  position Int
+  day      DayOfWeek?        @relation(fields: [dayId], references: [id])
+  dayId    String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("lessons")
+}
+
+model SubjectInstance {
+  id           String  @id @default(uuid())
+  subject      Subject @relation(fields: [subjectId], references: [id])
+  subjectId    String
+  isPermanent  Boolean
+  lessonEven   Lesson? @relation("EvenWeekInstances", fields: [lessonEvenId], references: [id])
+  lessonEvenId String?
+  lessonOdd    Lesson? @relation("OddWeekInstances", fields: [lessonOddId], references: [id])
+  lessonOddId  String?
+
+  @@map("subject_instances")
+}
+
+model Subject {
+  id        String          @id @default(uuid())
+  name      String
+  type      SubjectTypeEnum
+  teacher   User            @relation(fields: [teacherId], references: [id])
+  teacherId String
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  SubjectInstance SubjectInstance[]
+
+  @@map("subjects")
+}
+
+enum DayOfWeekEnum {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+}
+
+enum SubjectTypeEnum {
+  LECTURE
+  LAB
+  PRACTICE
+}
+
+enum UserRoleEnum {
+  STUDENT
+  TEACHER
+  MODERATOR
+  ADMIN
+}
+
+enum AuthMethodEnum {
+  CREDENTIALS
+  GOOGLE
+  YANDEX
+}
+
+enum TokenTypeEnum {
+  VERIFICATION
+  TWO_FACTOR
+  PASSWORD_RESET
+}
