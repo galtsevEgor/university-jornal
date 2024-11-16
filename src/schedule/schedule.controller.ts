@@ -13,14 +13,16 @@ import { CreateScheduleDto } from './dto/create-schedule.dto'
 export class ScheduleController {
   constructor(private readonly scheduleService: ScheduleService) {}
 
-  @Post('')
-  async create(@Body() createScheduleDto: CreateScheduleDto) {
-    try {
-      return await this.scheduleService.create(createScheduleDto);
-    } catch (error) {
-      throw new NotFoundException(error.message);
-    }
-  }
+
+  // нахой не надо
+  // @Post('')
+  // async create(@Body() createScheduleDto: CreateScheduleDto) {
+  //   try {
+  //     return await this.scheduleService.create(createScheduleDto);
+  //   } catch (error) {
+  //     throw new NotFoundException(error.message);
+  //   }
+  // }
 
   @Get(':id')
   async findById(@Param('id') id: string) {

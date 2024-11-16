@@ -1,13 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service'
-import { CreateDayOfWeekDto} from './dto/create-day-of-week.dto'
-import { UpdateDayOfWeekDto } from './dto/update-day-of-week.dto'
-import { LessonService } from 'src/lesson/lesson.service'
+import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateDayOfWeekDto } from './dto/create-day-of-week.dto';
+import { UpdateDayOfWeekDto } from './dto/update-day-of-week.dto';
+import { LessonService } from 'src/lesson/lesson.service';
 
 @Injectable()
 export class DayOfWeekService {
-
-  public constructor(private readonly prismaService: PrismaService, private readonly lessonService: LessonService) {}
+  public constructor(
+    private readonly prismaService: PrismaService,
+    private readonly lessonService: LessonService,
+  ) {}
 
   public async createDay(data: CreateDayOfWeekDto) {
     const day = await this.prismaService.dayOfWeek.create({
@@ -29,10 +31,25 @@ export class DayOfWeekService {
     return day;
   }
 
-  public async findAll(scheduleId: string) {
+  public async findAllForSchedule(scheduleId: string) {
     return await this.prismaService.dayOfWeek.findMany({
       where: { scheduleId },
-      include: { lessons: true },
+      include: { 
+        lessons: {
+          include: {
+            evenWeek: {
+              include: {
+                subject: true,
+              },
+            },
+            oddWeek: {
+              include: {
+                subject: true,
+              },
+            },
+          },
+        },
+       },
     });
   }
 
@@ -56,7 +73,7 @@ export class DayOfWeekService {
   //   if (!day) {
   //     throw new NotFoundException(`Day with ID "${id}" not found`);
   //   }
-  
+
   //   // Обновление данных дня недели
   //   return await this.prismaService.dayOfWeek.update({
   //     where: { id },

@@ -1,26 +1,32 @@
-import { Body, Controller, Get, NotFoundException, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+} from '@nestjs/common';
 import { DayOfWeekService } from './day-of-week.service';
-import { CreateDayOfWeekDto } from './dto/create-day-of-week.dto'
+import { CreateDayOfWeekDto } from './dto/create-day-of-week.dto';
 
 @Controller('day-of-week')
 export class DayOfWeekController {
   constructor(private readonly dayOfWeekService: DayOfWeekService) {}
 
-  @Post('')
-  async create(
-    @Body() createDayOfWeekDto: CreateDayOfWeekDto,
-  ) {
-    try {
-      return await this.dayOfWeekService.createDay(createDayOfWeekDto);
-    } catch (error) {
-      throw new NotFoundException(error.message);
-    }
-  }
+  // нахой не надо
+  // @Post('')
+  // async create(@Body() createDayOfWeekDto: CreateDayOfWeekDto) {
+  //   try {
+  //     return await this.dayOfWeekService.createDay(createDayOfWeekDto);
+  //   } catch (error) {
+  //     throw new NotFoundException(error.message);
+  //   }
+  // }
 
   @Get(':scheduleId')
   async findAll(@Param('scheduleId') scheduleId: string) {
     try {
-      return await this.dayOfWeekService.findAll(scheduleId);
+      return await this.dayOfWeekService.findAllForSchedule(scheduleId);
     } catch (error) {
       throw new NotFoundException(error.message);
     }

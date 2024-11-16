@@ -7,20 +7,21 @@ import { UpdateLessonDto } from './dto/update-lesson.dto';
 export class LessonController {
   constructor(private readonly lessonService: LessonService) {}
 
-  @Post()
-  async create(@Body() createLessonDto: CreateLessonDto) {
-    return this.lessonService.create(createLessonDto);
-  }
+  //тоже нахой не надо
+  // @Post('')
+  // async create(@Body() createLessonDto: CreateLessonDto) {
+  //   return this.lessonService.create(createLessonDto);
+  // }
 
   @Get(':lessonId')
   async getLessonsById(@Param('lessonId') groupId: string) {
     return this.lessonService.getLessonsByGroup(groupId);
   }
 
-  @Get('group/:groupId')
-  async getLessonsByGroup(@Param('groupId') groupId: string) {
-    return this.lessonService.getLessonsByGroup(groupId);
-  }
+  // @Get('group/:groupId')
+  // async getLessonsByGroup(@Param('groupId') groupId: string) {
+  //   return this.lessonService.getLessonsByGroup(groupId);
+  // }
 
   @Get('day/:dayId')
   async getLessonsByDay(@Param('dayId') dayId: string) {

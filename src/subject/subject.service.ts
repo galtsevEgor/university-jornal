@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service'
 import { CreateSubjectDto } from './dto/create-subject.dto'
 import { UpdateSubjectDto } from './dto/update-subject.dto'
@@ -8,12 +8,19 @@ export class SubjectService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(dto: CreateSubjectDto) {
+    const teacher = await this.prismaService.user.findUnique({
+      where: { id: dto.teacherId },
+    });
+
+    if(!(teacher.role === "TEACHER")) {
+      throw new BadRequestException("Teacher does't exist or it's not teacher")
+    }
+
     return await this.prismaService.subject.create({
       data: {
         name: dto.name,
         type: dto.type,
         teacher: {
-          // сделать проверку на существование учителя
           connect: { id: dto.teacherId },
         },
       },
@@ -22,14 +29,14 @@ export class SubjectService {
 
   async findAll() {
     return await this.prismaService.subject.findMany({
-      include: { teacher: true },
+      include: { teacher: { select: { id: true, displayName: true} } },
     });
   }
 
   async findOne(id: string) {
     const subject = await this.prismaService.subject.findUnique({
       where: { id },
-      include: { teacher: true },
+      include: { teacher: { select: { id: true, displayName: true} } },
     });
     if (!subject) {
       throw new NotFoundException(`Subject with ID "${id}" not found`);

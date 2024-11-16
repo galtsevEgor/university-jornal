@@ -5,18 +5,17 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
-import { DayOfWeekService } from 'src/day-of-week/day-of-week.service'
-import { DayOfWeekEnum } from 'prisma/__generated__'
+import { DayOfWeekService } from 'src/day-of-week/day-of-week.service';
+import { DayOfWeekEnum } from 'prisma/__generated__';
 
 @Injectable()
 export class ScheduleService {
   public constructor(
     private readonly prismaService: PrismaService,
-    private readonly dayOfWeekService: DayOfWeekService
+    private readonly dayOfWeekService: DayOfWeekService,
   ) {}
 
   public async create({ groupId }: { groupId: string }) {
-    // Создаем расписание
     const schedule = await this.prismaService.schedule.create({
       data: {
         group: {
@@ -34,7 +33,10 @@ export class ScheduleService {
       DayOfWeekEnum.SATURDAY,
     ];
     for (const day of days) {
-      await this.dayOfWeekService.createDay({scheduleId: schedule.id, dayOfWeek: day});
+      await this.dayOfWeekService.createDay({
+        scheduleId: schedule.id,
+        dayOfWeek: day,
+      });
     }
 
     return schedule;
@@ -44,8 +46,25 @@ export class ScheduleService {
     const schedule = await this.prismaService.schedule.findUnique({
       where: { id },
       include: {
-        group: true,
-        days: true,
+        group: true, // вроде не обязательно
+        days: {
+          include: {
+            lessons: {
+              include: {
+                evenWeek: {
+                  include: {
+                    subject: true,
+                  },
+                },
+                oddWeek: {
+                  include: {
+                    subject: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
 

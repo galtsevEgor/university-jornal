@@ -3,16 +3,17 @@ import { SubjectService } from './subject.service';
 import { CreateSubjectDto } from './dto/create-subject.dto';
 import { UpdateSubjectDto } from './dto/update-subject.dto';
 
-@Controller('subjects')
+@Controller('subject')
 export class SubjectController {
   constructor(private readonly subjectService: SubjectService) {}
 
-  @Post()
+  @Post('')
   async create(@Body() createSubjectDto: CreateSubjectDto) {
     return await this.subjectService.create(createSubjectDto);
   }
 
-  @Get()
+  // Можно добавить поиск потгруппам
+  @Get('')
   async findAll() {
     return await this.subjectService.findAll();
   }
